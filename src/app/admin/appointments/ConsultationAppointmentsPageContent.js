@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { PlayIcon, UsersIcon   } from "@heroicons/react/24/outline";
+import { PlayIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { RotateCcw, Trash } from "lucide-react";
 import { fetchData, deleteData } from "@/utils/api";
 import { useToast } from "@/context/ToastContext";
@@ -16,13 +16,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/admin/ui/table";
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
-const ConsultationAppointmentsPageContent  = () => {
+const ConsultationAppointmentsPageContent = () => {
   const [appointments, setAppointments] = useState([]);
-  const [pagination, setPagination] = useState({ totalPages: 1, currentPage: 1 });
-  const [filters, setFilters] = useState({ status: "", dateFrom: "", dateTo: "" });
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    currentPage: 1,
+  });
+  const [filters, setFilters] = useState({
+    status: "",
+    dateFrom: "",
+    dateTo: "",
+  });
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -43,23 +50,26 @@ const ConsultationAppointmentsPageContent  = () => {
       });
 
       query.set("hasSlot", "true");
-  
+
       // Add user-specific filters based on the role
       if (session?.user?.role === "user") {
-        query.set("patient", session?.user?.id);  // Using .set() to ensure the key is correctly added
+        query.set("patient", session?.user?.id); // Using .set() to ensure the key is correctly added
       } else if (session?.user?.role === "specialist") {
         query.set("consultant", session?.user?.id); // Using .set() for consistency
       }
-  
+
       // Fetch the data from the backend API
-      const res = await fetchData(`consultation-appointments/all/paginated?${query.toString()}`, token);
-      console.log(res.data)
+      const res = await fetchData(
+        `consultation-appointments/all/paginated?${query.toString()}`,
+        token,
+      );
+      console.log(res.data);
       // Handle the response and set data for appointments and pagination
       if (res && res.data) {
         setAppointments(res.data); // Update appointments state
         setPagination({
-          totalPages: res.totalPages || 1, 
-          currentPage: res.currentPage || 1, 
+          totalPages: res.totalPages || 1,
+          currentPage: res.currentPage || 1,
         });
       } else {
         setAppointments([]);
@@ -69,7 +79,6 @@ const ConsultationAppointmentsPageContent  = () => {
       console.error("Failed to load appointments:", err);
     }
   };
-  
 
   useEffect(() => {
     if (token) loadAppointments();
@@ -81,7 +90,7 @@ const ConsultationAppointmentsPageContent  = () => {
       addToast("Appointment deleted successfully", "success");
       setAppointments((prev) => prev.filter((a) => a._id !== itemToDelete._id));
     } catch (error) {
-      console.log(error)
+      console.log(error);
       addToast("Failed to delete appointment", "error");
     } finally {
       setIsDialogOpen(false);
@@ -113,18 +122,22 @@ const ConsultationAppointmentsPageContent  = () => {
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:text-gray-300 p-6">
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">Consultation Appointments</h1>
-        { session?.user?.role === "user" && <Link
-          href="/admin/consultation/book"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-full border border-indigo-400 shadow-lg shadow-indigo-500/50 ring-2 ring-indigo-300 hover:ring-4 transition-all duration-300"
-        >
-          + Book Appointment
-        </Link>}
+        {session?.user?.role === "user" && (
+          <Link
+            href="/admin/consultation/book"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-full border border-indigo-400 shadow-lg shadow-indigo-500/50 ring-2 ring-indigo-300 hover:ring-4 transition-all duration-300"
+          >
+            + Book Appointment
+          </Link>
+        )}
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Status</label>
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+            Status
+          </label>
           <select
             name="status"
             value={filters.status}
@@ -139,7 +152,9 @@ const ConsultationAppointmentsPageContent  = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Date From</label>
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+            Date From
+          </label>
           <input
             type="date"
             name="dateFrom"
@@ -149,7 +164,9 @@ const ConsultationAppointmentsPageContent  = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">Date To</label>
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+            Date To
+          </label>
           <input
             type="date"
             name="dateTo"
@@ -180,12 +197,42 @@ const ConsultationAppointmentsPageContent  = () => {
           <Table>
             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
               <TableRow>
-                <TableCell isHeader className="px-5 py-3 font-medium text-start">Patient</TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-start">Consultant</TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-start">Date</TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-start">Duration(mins)</TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-start">Status</TableCell>
-                <TableCell isHeader className="px-5 py-3 font-medium text-start">Actions</TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Patient
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Consultant
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Date
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Duration(mins)
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Status
+                </TableCell>
+                <TableCell
+                  isHeader
+                  className="px-5 py-3 font-medium text-start"
+                >
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
@@ -193,13 +240,17 @@ const ConsultationAppointmentsPageContent  = () => {
                 appointments.map((appointment) => (
                   <TableRow key={appointment._id}>
                     <TableCell className="px-5 py-4">
-                      {appointment.patient?.firstName} {appointment.patient?.lastName}
+                      {appointment.patient?.firstName}{" "}
+                      {appointment.patient?.lastName}
                     </TableCell>
                     <TableCell className="px-5 py-4">
-                      {appointment.consultant?.firstName} {appointment.consultant?.lastName}
+                      {appointment.consultant?.firstName}{" "}
+                      {appointment.consultant?.lastName}
                     </TableCell>
                     <TableCell className="px-5 py-4">
-                      {appointment.date ? format(new Date(appointment.date), "PPPp") : "-"}
+                      {appointment.date
+                        ? format(new Date(appointment.date), "PPPp")
+                        : "-"}
                     </TableCell>
                     <TableCell className="px-5 py-4">
                       {appointment.duration}
@@ -208,19 +259,23 @@ const ConsultationAppointmentsPageContent  = () => {
                       {appointment.status}
                     </TableCell>
                     <TableCell className="px-5 py-4 flex gap-3">
-                      <Menu as="div" className="relative inline-block text-left">
+                      <Menu
+                        as="div"
+                        className="relative inline-block text-left"
+                      >
                         <div>
                           <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50">
                             Options
-                            <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400" />
+                            <ChevronDownIcon
+                              aria-hidden="true"
+                              className="-mr-1 size-5 text-gray-400"
+                            />
                           </MenuButton>
                         </div>
 
-                        <MenuItems
-                          className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-                        >
+                        <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in">
                           <div className="py-1">
-                            {(appointment.status === "completed") &&
+                            {appointment.status === "completed" && (
                               <>
                                 <MenuItem>
                                   <Link
@@ -231,7 +286,7 @@ const ConsultationAppointmentsPageContent  = () => {
                                     Create Certificate
                                   </Link>
                                 </MenuItem>
-                                
+
                                 <MenuItem>
                                   <Link
                                     href={`/admin/appointments/session/${appointment._id}`}
@@ -252,8 +307,8 @@ const ConsultationAppointmentsPageContent  = () => {
                                   </Link>
                                 </MenuItem>
                               </>
-                            }
-                            { appointment.status !== "completed" &&
+                            )}
+                            {appointment.status !== "completed" && (
                               <>
                                 <MenuItem>
                                   <Link
@@ -273,10 +328,10 @@ const ConsultationAppointmentsPageContent  = () => {
                                     Available Doctors
                                   </Link>
                                 </MenuItem> */}
-                                
-                              </>}
+                              </>
+                            )}
 
-                              {/* { session?.user?.role === "user" &&
+                            {/* { session?.user?.role === "user" &&
                                 <MenuItem>
                                   <Link
                                     href={`/admin/appointments/retake/${appointment._id}`}
@@ -288,7 +343,7 @@ const ConsultationAppointmentsPageContent  = () => {
                                 </MenuItem>
                               } */}
 
-                            { session?.user?.role === "admin" &&
+                            {session?.user?.role === "admin" && (
                               <>
                                 <MenuItem>
                                   <Link
@@ -301,7 +356,10 @@ const ConsultationAppointmentsPageContent  = () => {
 
                                 <MenuItem>
                                   <button
-                                    onClick={() => {setIsDialogOpen(true); setItemToDelete(appointment)}}
+                                    onClick={() => {
+                                      setIsDialogOpen(true);
+                                      setItemToDelete(appointment);
+                                    }}
                                     className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
                                   >
                                     <Trash className="w-4 h-4 text-red-500" />
@@ -309,7 +367,7 @@ const ConsultationAppointmentsPageContent  = () => {
                                   </button>
                                 </MenuItem>
                               </>
-                            }
+                            )}
                           </div>
                         </MenuItems>
                       </Menu>
@@ -318,7 +376,10 @@ const ConsultationAppointmentsPageContent  = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-4 text-gray-500"
+                  >
                     No appointments found.
                   </TableCell>
                 </TableRow>
@@ -363,4 +424,4 @@ const ConsultationAppointmentsPageContent  = () => {
   );
 };
 
-export default ConsultationAppointmentsPageContent ;
+export default ConsultationAppointmentsPageContent;

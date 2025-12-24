@@ -29,7 +29,10 @@ export default function SpecialistsPageContent() {
   const loadSpecialists = async () => {
     setLoading(true);
     try {
-      const res = await fetchData("users/get-all/no-pagination?role=specialist", token);
+      const res = await fetchData(
+        "users/get-all/no-pagination?role=specialist",
+        token,
+      );
       setSpecialists(res);
     } catch (err) {
       addToast("Failed to load specialists", "error");
@@ -39,15 +42,16 @@ export default function SpecialistsPageContent() {
   };
 
   useEffect(() => {
-    if(session?.user && token)
-    loadSpecialists();
+    if (session?.user && token) loadSpecialists();
   }, [session, token]);
 
   const handleDelete = async () => {
     try {
       await deleteData(`/api/specialists/${deletingId}`);
       addToast("Specialist deleted successfully", "success");
-      setSpecialists((prev) => prev.filter((specialist) => specialist._id !== deletingId));
+      setSpecialists((prev) =>
+        prev.filter((specialist) => specialist._id !== deletingId),
+      );
     } catch {
       addToast("Failed to delete specialist", "error");
     } finally {
@@ -78,29 +82,68 @@ export default function SpecialistsPageContent() {
             <Table>
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Full Name</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Email</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Specialty</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Approved</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Actions</TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Full Name
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Email
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Specialty
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Approved
+                  </TableCell>
+                  <TableCell
+                    isHeader
+                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                  >
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {specialists.length > 0 ? (
                   specialists.map((specialist) => (
                     <TableRow key={specialist._id}>
-                      <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400">{specialist.firstName} {specialist.lastName}</TableCell>
-                      <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400">{specialist.email}</TableCell>
-                      <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400">{specialist.specialty || "-"}</TableCell>
-                      <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400">{specialist.isApproved ? "Yes" : "No"}</TableCell>
+                      <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400">
+                        {specialist.firstName} {specialist.lastName}
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400">
+                        {specialist.email}
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400">
+                        {specialist.specialty || "-"}
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400">
+                        {specialist.isApproved ? "Yes" : "No"}
+                      </TableCell>
                       <TableCell className="px-5 py-4 text-gray-500 text-theme-sm dark:text-gray-400 flex gap-3">
-                        <Link href={`/admin/specialists/details/${specialist._id}`} className="text-blue-500">
+                        <Link
+                          href={`/admin/specialists/details/${specialist._id}`}
+                          className="text-blue-500"
+                        >
                           <PencilIcon className="w-5 h-5" />
                         </Link>
-                        <button className="text-red-500" onClick={() => {
-                          setDeletingId(specialist._id);
-                          setIsDialogOpen(true);
-                        }}>
+                        <button
+                          className="text-red-500"
+                          onClick={() => {
+                            setDeletingId(specialist._id);
+                            setIsDialogOpen(true);
+                          }}
+                        >
                           <Trash2Icon className="w-5 h-5" />
                         </button>
                       </TableCell>
@@ -108,7 +151,10 @@ export default function SpecialistsPageContent() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="px-5 py-4 text-start flex gap-3">
+                    <TableCell
+                      colSpan={5}
+                      className="px-5 py-4 text-start flex gap-3"
+                    >
                       No specialists found.
                     </TableCell>
                   </TableRow>
@@ -120,14 +166,14 @@ export default function SpecialistsPageContent() {
       </div>
 
       <ConfirmationDialog
-            isOpen={isDialogOpen}
-            onClose={() => setIsDialogOpen(false)}
-            onConfirm={handleDelete}
-            title="Delete Appointment"
-            message="Are you sure you want to delete this specialist?"
-            confirmText="Yes, Delete"
-            cancelText="Cancel"
-        />
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onConfirm={handleDelete}
+        title="Delete Appointment"
+        message="Are you sure you want to delete this specialist?"
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

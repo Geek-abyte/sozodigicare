@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import AuthLayout from "@/app/authLayout";
 import Link from "next/link";
 import Image from "next/image";
-import { doctors2 } from '@/assets';
+import { doctors2 } from "@/assets";
 import { FaSpinner } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
 import { useSearchParams } from "next/navigation";
@@ -27,7 +27,6 @@ export default function LoginPage() {
   // const callbackUrl = searchParams.get("callbackUrl") || "/admin";
   const callbackUrl = "/admin";
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -42,16 +41,19 @@ export default function LoginPage() {
 
     if (res?.error) {
       let friendlyMessage = "An unexpected error occurred. Please try again.";
-      if (res.error.toLowerCase().includes("credentials" || "Unauthorized")) {
+      if (
+        res.error.toLowerCase().includes("credentials") ||
+        res.error.toLowerCase().includes("Unauthorized")
+      ) {
         friendlyMessage = "Incorrect email or password.";
       } else if (res.error.toLowerCase().includes("network")) {
         friendlyMessage = "Network error. Please check your connection.";
       }
       setError(friendlyMessage);
-      addToast(friendlyMessage, "error")
+      addToast(friendlyMessage, "error");
       setIsSubmitting(false);
     } else {
-      addToast("Login successful!", "success")
+      addToast("Login successful!", "success");
       router.push(res.url || callbackUrl);
     }
   };

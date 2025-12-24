@@ -54,7 +54,7 @@ const CreateConsultantAvailabilityPage = () => {
         diffMins < 0
           ? "End time must be after start time."
           : "Availability must be at least 10 minutes.",
-        "error"
+        "error",
       );
       setSubmitting(false);
       return;
@@ -112,7 +112,14 @@ const CreateConsultantAvailabilityPage = () => {
 
         {/* Type Selector */}
         <div>
-          <label className="block mb-1 font-medium">Consultation Reason <br/> (<small className="text-red-500">Note: No action required if consultation is not for medical certificate</small>)</label>
+          <label className="block mb-1 font-medium">
+            Consultation Reason <br /> (
+            <small className="text-red-500">
+              Note: No action required if consultation is not for medical
+              certificate
+            </small>
+            )
+          </label>
           <select
             name="category"
             value={form.category}
@@ -136,13 +143,19 @@ const CreateConsultantAvailabilityPage = () => {
               className="w-full rounded border px-3 py-2 bg-white dark:bg-gray-800 dark:text-gray-200"
             >
               <option value="">Select Day</option>
-              {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(
-                (day) => (
-                  <option key={day} value={day}>
-                    {day}
-                  </option>
-                )
-              )}
+              {[
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ].map((day) => (
+                <option key={day} value={day}>
+                  {day}
+                </option>
+              ))}
             </select>
           </div>
         ) : (
@@ -163,7 +176,9 @@ const CreateConsultantAvailabilityPage = () => {
             <label className="block mb-1 font-medium">Start Time</label>
             <TimePicker
               value={form.startTime}
-              onChange={(value) => setForm((prev) => ({ ...prev, startTime: value }))}
+              onChange={(value) =>
+                setForm((prev) => ({ ...prev, startTime: value }))
+              }
               disableClock
               className="w-full"
             />
@@ -172,7 +187,9 @@ const CreateConsultantAvailabilityPage = () => {
             <label className="block mb-1 font-medium">End Time</label>
             <TimePicker
               value={form.endTime}
-              onChange={(value) => setForm((prev) => ({ ...prev, endTime: value }))}
+              onChange={(value) =>
+                setForm((prev) => ({ ...prev, endTime: value }))
+              }
               disableClock
               className="w-full"
             />
@@ -184,7 +201,9 @@ const CreateConsultantAvailabilityPage = () => {
           type="submit"
           disabled={submitting}
           className={`w-full ${
-            submitting ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
+            submitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-indigo-600 hover:bg-indigo-700"
           } text-white py-2 rounded font-medium transition`}
         >
           {submitting ? "Creating..." : "Create Availability"}

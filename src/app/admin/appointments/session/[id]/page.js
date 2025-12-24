@@ -25,14 +25,11 @@ import useAppointment from "@/hooks/useAppointment";
 import { postData, fetchData, updateData } from "@/utils/api";
 import { getSocket } from "@/lib/socket";
 
-
-
 const SessionPage = () => {
   const { id } = useParams();
   const router = useRouter();
-  
 
-  const videoUrl = `https://videowidget.sozodigicare.com/?room=${id}`
+  const videoUrl = `https://videowidget.sozodigicare.com/?room=${id}`;
 
   const { data: session } = useSession();
   const token = session?.user?.jwt;
@@ -42,7 +39,6 @@ const SessionPage = () => {
 
   const { appointment, loading } = useAppointment(id, token);
   const [showConfirmEnd, setShowConfirmEnd] = useState(false);
-
 
   const iframeRef = useRef(null);
 
@@ -82,17 +78,20 @@ const SessionPage = () => {
     testName: "",
     labName: "",
     note: "",
-    status: "pending"
+    status: "pending",
   });
   const [savingReferral, setSavingReferral] = useState(false);
-  
 
-  const [newPrescription, setNewPrescription] = useState({ medication: '', dosage: '', frequency: '' });
+  const [newPrescription, setNewPrescription] = useState({
+    medication: "",
+    dosage: "",
+    frequency: "",
+  });
 
   const videoRef = useRef();
   const appointmentRef = useRef(appointment);
   const socketRef = useRef();
-  
+
   useEffect(() => {
     socketRef.current = getSocket();
   }, []);
@@ -107,68 +106,86 @@ const SessionPage = () => {
     }
   };
 
-  useEffect(()=> {
-    if(appointment?.session?.appointment?.status === "completed"){
-      setIsTimerRunning(false)
-      router.push(`/admin/appointments/session/completed/${id}`)
+  useEffect(() => {
+    if (appointment?.session?.appointment?.status === "completed") {
+      setIsTimerRunning(false);
+      router.push(`/admin/appointments/session/completed/${id}`);
     }
-  }, [appointment])
+  }, [appointment]);
 
-  useEffect(()=> {
-    if(appointmentRef.current?.session && appointmentRef.current?.session?.appointment?.status === "pending"){
-      setIsTimerRunning(true)
+  useEffect(() => {
+    if (
+      appointmentRef.current?.session &&
+      appointmentRef.current?.session?.appointment?.status === "pending"
+    ) {
+      setIsTimerRunning(true);
     }
-  }, [appointmentRef.current])
+  }, [appointmentRef.current]);
 
   const handleEndSession = async () => {
     const currentAppointment = appointmentRef.current;
-    if (!currentAppointment?.session._id || !token || currentAppointment.status === "completed") return;
+    if (
+      !currentAppointment?.session._id ||
+      !token ||
+      currentAppointment.status === "completed"
+    )
+      return;
     try {
       setEndingSession(true);
       socketRef.current.emit("session-ended", {
         specialist: user,
-        appointmentId: currentAppointment.session.appointment._id
+        appointmentId: currentAppointment.session.appointment._id,
       });
-      await updateData(`consultation-appointments/update/custom/${currentAppointment.session.appointment._id}`, { status: "completed" }, token);
+      await updateData(
+        `consultation-appointments/update/custom/${currentAppointment.session.appointment._id}`,
+        { status: "completed" },
+        token,
+      );
       const endTime = new Date().toISOString();
       const startTime = new Date(currentAppointment.session.startTime);
       const durationInMinutes = Math.round((new Date() - startTime) / 60000);
-      await updateData(`video-sessions/${currentAppointment.session._id}`, { endTime, durationInMinutes }, token);
+      await updateData(
+        `video-sessions/${currentAppointment.session._id}`,
+        { endTime, durationInMinutes },
+        token,
+      );
     } catch (err) {
       console.error("Failed to end session", err);
     } finally {
-      localStorage.removeItem(`sessionStartTime-${currentAppointment.session.appointment._id}`);
+      localStorage.removeItem(
+        `sessionStartTime-${currentAppointment.session.appointment._id}`,
+      );
       setSessionEnded(true);
       handleEndCall();
       setIsTimerRunning(false);
       setEndingSession(false);
-      router.push(`/admin/appointments/session/completed/${id}`)
+      router.push(`/admin/appointments/session/completed/${id}`);
     }
   };
 
-   // load documentation when dialog is opened
-   useEffect(() => {
+  // load documentation when dialog is opened
+  useEffect(() => {
     const fetchDocumentation = async () => {
       if (!appointmentRef.current?.session?._id || !token) return;
-  
+
       try {
         setSessionNotes("loading...");
         const response = await fetchData(
           `video-sessions/${appointmentRef.current.session._id}`,
-          token
+          token,
         );
         // console.log(response.success && response.session)
         if (response.success && response.session) {
-          setSessionNotes(response.session.sessionNotes || '');
+          setSessionNotes(response.session.sessionNotes || "");
         } else {
-          setSessionNotes('');
+          setSessionNotes("");
         }
       } catch (error) {
-        console.error('Failed to fetch documentation:', error);
-        setSessionNotes('');
+        console.error("Failed to fetch documentation:", error);
+        setSessionNotes("");
       }
     };
-  
+
     if (showDocs) {
       fetchDocumentation();
     }
@@ -177,11 +194,11 @@ const SessionPage = () => {
   useEffect(() => {
     const fetchPrescriptions = async () => {
       if (!appointmentRef.current?.session?._id || !token) return;
-  
+
       try {
         const response = await fetchData(
           `video-sessions/${appointmentRef.current.session._id}`,
-          token
+          token,
         );
         if (response.success && response.session) {
           setPrescriptions(response.session.prescriptions || []);
@@ -189,22 +206,26 @@ const SessionPage = () => {
           setPrescriptions([]);
         }
       } catch (error) {
-        console.error('Failed to fetch prescriptions:', error);
+        console.error("Failed to fetch prescriptions:", error);
         setPrescriptions([]);
       }
     };
-  
+
     if (showPrescriptions) {
       fetchPrescriptions();
     }
   }, [showPrescriptions]);
 
   useEffect(() => {
-    const storedSession = localStorage.getItem('activeVideoSession');
+    const storedSession = localStorage.getItem("activeVideoSession");
     if (storedSession) {
       const sessionData = JSON.parse(storedSession);
-      setSpecialistToken(sessionData?.session?.specialistToken || sessionData?.specialistToken);
-      setPatientToken(sessionData?.session?.patientToken || sessionData?.patientToken);
+      setSpecialistToken(
+        sessionData?.session?.specialistToken || sessionData?.specialistToken,
+      );
+      setPatientToken(
+        sessionData?.session?.patientToken || sessionData?.patientToken,
+      );
     }
   }, []);
 
@@ -215,7 +236,7 @@ const SessionPage = () => {
       try {
         const response = await fetchData(
           `video-sessions/${appointmentRef.current.session._id}`,
-          token
+          token,
         );
         if (response.success && response.session) {
           setLabReferrals(response.session.labReferrals || []);
@@ -223,7 +244,7 @@ const SessionPage = () => {
           setLabReferrals([]);
         }
       } catch (error) {
-        console.error('Failed to fetch lab referrals:', error);
+        console.error("Failed to fetch lab referrals:", error);
         setLabReferrals([]);
       }
     };
@@ -236,13 +257,13 @@ const SessionPage = () => {
   const handleSaveNotes = async () => {
     const currentAppointment = appointmentRef.current;
     if (!currentAppointment?.session?._id || !token) return;
-  
+
     try {
       setSavingNotes(true);
       await updateData(
         `video-sessions/${currentAppointment.session._id}`,
         { sessionNotes },
-        token
+        token,
       );
       addToast("Notes saved successfully!", "success");
       setShowDocs(false);
@@ -255,54 +276,57 @@ const SessionPage = () => {
   };
 
   const handleAddPrescription = async () => {
-    setsavingPrescription(true)
+    setsavingPrescription(true);
     if (
       !newPrescription.medication ||
       !newPrescription.dosage ||
       !newPrescription.frequency
     ) {
-      alert('Please fill all fields');
+      alert("Please fill all fields");
       return;
     }
-  
+
     const updatedPrescriptions = [...prescriptions, newPrescription];
 
     // console.log(updatedPrescriptions)
-  
+
     try {
       await updateData(
         `video-sessions/${appointmentRef.current.session._id}`,
         { prescriptions: updatedPrescriptions },
-        token
+        token,
       );
       setPrescriptions(updatedPrescriptions);
-      setNewPrescription({ medication: '', dosage: '', frequency: '' });
+      setNewPrescription({ medication: "", dosage: "", frequency: "" });
     } catch (error) {
-      console.error('Failed to add prescription:', error);
-    }finally{
-      setsavingPrescription(false)
+      console.error("Failed to add prescription:", error);
+    } finally {
+      setsavingPrescription(false);
     }
   };
-  
+
   const handleDeletePrescription = async (index) => {
     const updatedPrescriptions = prescriptions.filter((_, i) => i !== index);
-  
+
     try {
       await updateData(
         `video-sessions/${appointmentRef.current.session._id}`,
         { prescriptions: updatedPrescriptions },
-        token
+        token,
       );
       setPrescriptions(updatedPrescriptions);
     } catch (error) {
-      console.error('Failed to delete prescription:', error);
+      console.error("Failed to delete prescription:", error);
     }
   };
 
   const loadHealthQuestions = async (userId) => {
     try {
       setLoadingQuestions(true);
-      const res = await fetchData(`health-questionnaires/user/${userId}`, token);
+      const res = await fetchData(
+        `health-questionnaires/user/${userId}`,
+        token,
+      );
       setHealthQuestions(res);
     } catch (err) {
       console.error("Failed to fetch health questions", err);
@@ -311,7 +335,7 @@ const SessionPage = () => {
     }
   };
 
- const handleAddReferral = async () => {
+  const handleAddReferral = async () => {
     if (!newReferral.testName.trim()) {
       addToast("Test name is required", "error");
       return;
@@ -324,10 +348,15 @@ const SessionPage = () => {
       await updateData(
         `video-sessions/${appointmentRef.current.session._id}`,
         { labReferrals: updated },
-        token
+        token,
       );
       setLabReferrals(updated);
-      setNewReferral({ testName: "", labName: "", note: "", status: "pending" });
+      setNewReferral({
+        testName: "",
+        labName: "",
+        note: "",
+        status: "pending",
+      });
     } catch (error) {
       console.error("Failed to add referral", error);
       addToast("Failed to add referral", "error");
@@ -343,7 +372,7 @@ const SessionPage = () => {
       await updateData(
         `video-sessions/${appointmentRef.current.session._id}`,
         { labReferrals: updated },
-        token
+        token,
       );
       setLabReferrals(updated);
     } catch (error) {
@@ -352,43 +381,50 @@ const SessionPage = () => {
     }
   };
 
-
-
   const patient = appointment?.session?.user;
   const specialist = appointment?.session?.specialist;
 
-  const handleSessionEnded = useCallback(({ specialist, appointmentId }) => {
-    try {
-      console.log("🔔 session-ended event received:", { specialist, appointmentId });
-  
-      const currentAppointment = appointmentRef.current;
-      console.log("📋 Current appointment:", currentAppointment);
-  
-      const sessionIdMatch = currentAppointment?.session?.appointment?._id === appointmentId;
-      const userIdMatch = currentAppointment?.session?.user?._id === session?.user?.id;
-  
-      console.log("✅ sessionIdMatch:", sessionIdMatch);
-      console.log("✅ userIdMatch:", userIdMatch);
-  
-      if (sessionIdMatch && userIdMatch) {
-        setSessionEnded(true);
-        setIsTimerRunning(false);
-        setShowRatingField(true);
-        handleEndCall();
-        if(specialist.role === "user"){
-          addToast("Patient has ended the session", "info", 5000);
-        }else{
-          addToast("Specialist has ended the session", "info", 5000);
+  const handleSessionEnded = useCallback(
+    ({ specialist, appointmentId }) => {
+      try {
+        console.log("🔔 session-ended event received:", {
+          specialist,
+          appointmentId,
+        });
+
+        const currentAppointment = appointmentRef.current;
+        console.log("📋 Current appointment:", currentAppointment);
+
+        const sessionIdMatch =
+          currentAppointment?.session?.appointment?._id === appointmentId;
+        const userIdMatch =
+          currentAppointment?.session?.user?._id === session?.user?.id;
+
+        console.log("✅ sessionIdMatch:", sessionIdMatch);
+        console.log("✅ userIdMatch:", userIdMatch);
+
+        if (sessionIdMatch && userIdMatch) {
+          setSessionEnded(true);
+          setIsTimerRunning(false);
+          setShowRatingField(true);
+          handleEndCall();
+          if (specialist.role === "user") {
+            addToast("Patient has ended the session", "info", 5000);
+          } else {
+            addToast("Specialist has ended the session", "info", 5000);
+          }
+          router.push(`/admin/appointments/session/completed/${id}`);
+        } else {
+          console.warn(
+            "⚠️ session-ended received but session or user ID did not match",
+          );
         }
-        router.push(`/admin/appointments/session/completed/${id}`)
-      } else {
-        console.warn("⚠️ session-ended received but session or user ID did not match");
+      } catch (error) {
+        console.error("❌ Error in handleSessionEnded:", error);
       }
-    } catch (error) {
-      console.error("❌ Error in handleSessionEnded:", error);
-    }
-  }, [appointmentRef, session?.user?.id, handleEndSession, handleEndCall]); // Add only necessary dependencies
-  
+    },
+    [appointmentRef, session?.user?.id, handleEndSession, handleEndCall],
+  ); // Add only necessary dependencies
 
   const handleOpenQuestions = async () => {
     // console.log("Question clicked", appointment.session)
@@ -399,17 +435,23 @@ const SessionPage = () => {
   };
 
   if (loading) {
-    return <div className="text-center mt-10 text-gray-600">Loading session...</div>;
+    return (
+      <div className="text-center mt-10 text-gray-600">Loading session...</div>
+    );
   }
 
   if (!appointment) {
-    return <div className="text-center mt-10 text-red-500">Appointment not found</div>;
+    return (
+      <div className="text-center mt-10 text-red-500">
+        Appointment not found
+      </div>
+    );
   }
 
-  
-
   return (
-    <div className={`absolute top-0 left-0 w-full transition-all duration-300 z-9999999999`}>
+    <div
+      className={`absolute top-0 left-0 w-full transition-all duration-300 z-9999999999`}
+    >
       <div className="bg-black">
         <div className="absolute top-4 right-4 flex gap-2 z-9999999">
           {/* <button
@@ -418,15 +460,17 @@ const SessionPage = () => {
           >
             {isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           </button> */}
-          { isTimerRunning && userRole === "specialist" &&<button
-            onClick={() => setShowOptions(!showOptions)}
-            className="bg-white dark:bg-gray-800 border px-3 py-1 rounded-full text-xl font-bold shadow hover:bg-gray-200 dark:hover:bg-gray-700"
-            title="Options"
-          >
-            ⋮
-          </button>}
+          {isTimerRunning && userRole === "specialist" && (
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className="bg-white dark:bg-gray-800 border px-3 py-1 rounded-full text-xl font-bold shadow hover:bg-gray-200 dark:hover:bg-gray-700"
+              title="Options"
+            >
+              ⋮
+            </button>
+          )}
         </div>
-        
+
         {/* Timer */}
         <div className="absolute top-5 right-25 transform -translate-x-1/2 mb-6 z-999999">
           <SessionTimer
@@ -441,9 +485,10 @@ const SessionPage = () => {
         </div>
 
         <div className="absolute top-10 left-1/2 -translate-x-1/2 text-white z-[99999999] bg-black/60 backdrop-blur px-4 py-2 rounded">
-           { userRole === "user" ? `Consultant: ${appointment.session.specialist.firstName} ${appointment.session.specialist.lastName}` : `Patient: ${appointment.session.user.firstName} ${appointment.session.user.lastName}`}
+          {userRole === "user"
+            ? `Consultant: ${appointment.session.specialist.firstName} ${appointment.session.specialist.lastName}`
+            : `Patient: ${appointment.session.user.firstName} ${appointment.session.user.lastName}`}
         </div>
-
 
         {/* Video Area */}
         <div className="mb-6">
@@ -463,7 +508,8 @@ const SessionPage = () => {
           />
         </div>
 
-        {showOptions && (userRole === "specialist" || userRole === "consultant") &&
+        {showOptions &&
+          (userRole === "specialist" || userRole === "consultant") &&
           appointment.session.appointment.status === "pending" &&
           !sessionEnded && (
             <div className="absolute top-16 right-4 bg-gray-800 rounded-xl shadow-xl p-4 w-60 z-[9999999] space-y-3 animate-fade-in border dark:border-gray-700">
@@ -475,7 +521,6 @@ const SessionPage = () => {
                 <span>🔚</span>
                 {endingSession ? "Ending..." : "End Session"}
               </button>
-
 
               <button
                 onClick={() => setShowDocs(true)}
@@ -501,8 +546,7 @@ const SessionPage = () => {
                 Lab Referral
               </button>
             </div>
-
-        )}
+          )}
 
         {/* Dialogs */}
         <NotesDialog
@@ -554,7 +598,6 @@ const SessionPage = () => {
         /> */}
       </div>
     </div>
-
   );
 };
 

@@ -1,7 +1,13 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_NODE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_NODE_API_BASE_URL || "http://localhost:5000";
 
 // Timeout Fetch with Retry
-export async function fetchWithTimeout(resource, options = {}, timeout = 10000, retries = 3) {
+export async function fetchWithTimeout(
+  resource,
+  options = {},
+  timeout = 10000,
+  retries = 3,
+) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
@@ -59,12 +65,19 @@ async function handleResponse(res) {
 // GET
 export async function fetchData(endpoint, token = null) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, { headers });
+  const res = await fetchWithTimeout(`${API_BASE_URL}/${endpoint}`, {
+    headers,
+  });
   return handleResponse(res);
 }
 
 // POST
-export async function postData(endpoint, data, token = null, isFormData = false) {
+export async function postData(
+  endpoint,
+  data,
+  token = null,
+  isFormData = false,
+) {
   const headers = token
     ? {
         Authorization: `Bearer ${token}`,
@@ -82,7 +95,12 @@ export async function postData(endpoint, data, token = null, isFormData = false)
 }
 
 // PUT
-export async function updateData(endpoint, data, token = null, isFormData = false) {
+export async function updateData(
+  endpoint,
+  data,
+  token = null,
+  isFormData = false,
+) {
   const headers = token
     ? {
         Authorization: `Bearer ${token}`,

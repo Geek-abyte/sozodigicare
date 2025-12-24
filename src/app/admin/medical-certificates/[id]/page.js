@@ -1,37 +1,43 @@
-"use client"
-import React, { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
-import { fetchData } from "@/utils/api"
-import { useSession } from "next-auth/react"
+"use client";
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { fetchData } from "@/utils/api";
+import { useSession } from "next-auth/react";
 
 const MedicalCertificate = () => {
-  const { id } = useParams()
-  const [certificate, setCertificate] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const { id } = useParams();
+  const [certificate, setCertificate] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const { data: session } = useSession()
-  const token = session?.user?.jwt
+  const { data: session } = useSession();
+  const token = session?.user?.jwt;
 
-  const API_URL = process.env.NEXT_PUBLIC_NODE_BASE_URL
+  const API_URL = process.env.NEXT_PUBLIC_NODE_BASE_URL;
 
   useEffect(() => {
     const fetchCertificate = async () => {
       try {
-        const res = await fetchData(`certificates/custom/get/${id}`, token)
+        const res = await fetchData(`certificates/custom/get/${id}`, token);
         // console.log(res)
-        setCertificate(res)
+        setCertificate(res);
       } catch (error) {
-        console.error("Failed to load certificate:", error)
+        console.error("Failed to load certificate:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    if (id && token) fetchCertificate()
-  }, [id, token])
+    if (id && token) fetchCertificate();
+  }, [id, token]);
 
-  if (loading) return <div className="text-center py-20">Loading certificate...</div>
-  if (!certificate) return <div className="text-center py-20 text-red-500">Certificate not found.</div>
+  if (loading)
+    return <div className="text-center py-20">Loading certificate...</div>;
+  if (!certificate)
+    return (
+      <div className="text-center py-20 text-red-500">
+        Certificate not found.
+      </div>
+    );
 
   const {
     diagnosis = "N/A",
@@ -40,20 +46,26 @@ const MedicalCertificate = () => {
     certID,
     patient,
     doctor,
-    qrCodeUrl
-  } = certificate
+    qrCodeUrl,
+  } = certificate;
 
-  const patientName = patient?.firstName+" "+patient?.lastName || "Unknown Patient"
-  const patientID = patient?._id || "—"
-  const doctorName = doctor?.firstName+" "+doctor?.lastName || "Unknown Doctor"
-  const durationMatch = comment.match(/(\d+)\s*day/i)
-  const duration = durationMatch ? durationMatch[1] : "a few"
+  const patientName =
+    patient?.firstName + " " + patient?.lastName || "Unknown Patient";
+  const patientID = patient?._id || "—";
+  const doctorName =
+    doctor?.firstName + " " + doctor?.lastName || "Unknown Doctor";
+  const durationMatch = comment.match(/(\d+)\s*day/i);
+  const duration = durationMatch ? durationMatch[1] : "a few";
 
   return (
     <div className="w-full px-2 sm:px-4 md:px-6 py-10 print:p-0 flex justify-center print:bg-white">
       <div className="bg-white w-full max-w-[794px] border shadow print:shadow-none print:border-none p-6 sm:p-10 text-gray-900 relative">
         {/* Watermark */}
-        <img src="/images/logo/icon.png" className="absolute inset-0 w-full h-full opacity-2 pointer-events-none object-contain" alt="Watermark" />
+        <img
+          src="/images/logo/icon.png"
+          className="absolute inset-0 w-full h-full opacity-2 pointer-events-none object-contain"
+          alt="Watermark"
+        />
 
         <div className="border-6 border-[#9bb5b4] p-4 sm:p-6 md:p-10 text-center">
           {/* Header */}
@@ -77,17 +89,17 @@ const MedicalCertificate = () => {
           {/* Body */}
           <div className="leading-8 mb-10 text-sm sm:text-base">
             <p>
-              This certifies that <strong>{patientName}</strong> underwent a medical
-              evaluation at <strong>Sozo Digicare</strong> on{" "}
-              <strong>{new Date(issueDate).toLocaleDateString()}</strong> and is currently experiencing{" "}
-              <strong>{diagnosis}</strong>.
+              This certifies that <strong>{patientName}</strong> underwent a
+              medical evaluation at <strong>Sozo Digicare</strong> on{" "}
+              <strong>{new Date(issueDate).toLocaleDateString()}</strong> and is
+              currently experiencing <strong>{diagnosis}</strong>.
             </p>
 
             <p className="mt-6">
               {comment || (
                 <>
-                  She is advised to refrain from work and physical activities for{" "}
-                  <strong>{duration} days</strong> for her recovery.
+                  She is advised to refrain from work and physical activities
+                  for <strong>{duration} days</strong> for her recovery.
                 </>
               )}
             </p>
@@ -117,14 +129,18 @@ const MedicalCertificate = () => {
             </div>
 
             <div className="mt-6 text-sm text-center">
-              <p>Patient’s ID Number: <strong>{patientID}</strong></p>
-              <p>Certificate ID: <strong>{certID}</strong></p>
+              <p>
+                Patient’s ID Number: <strong>{patientID}</strong>
+              </p>
+              <p>
+                Certificate ID: <strong>{certID}</strong>
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default MedicalCertificate
+export default MedicalCertificate;

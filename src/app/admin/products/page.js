@@ -20,8 +20,10 @@ const ProductsPage = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const data = await fetchData("/products/get-all/brand-category?page=1&perpage=5");
-        console.log(data.data)
+        const data = await fetchData(
+          "/products/get-all/brand-category?page=1&perpage=5",
+        );
+        console.log(data.data);
         setProducts(data.data);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -41,7 +43,6 @@ const ProductsPage = () => {
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:text-gray-300 p-6">
-
       {/* Header */}
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">Product Management</h1>
@@ -142,8 +143,8 @@ const ProductsPage = () => {
                           product.status === "available"
                             ? "success"
                             : product.status === "Low Stock"
-                            ? "warning"
-                            : "error"
+                              ? "warning"
+                              : "error"
                         }
                       >
                         {product.status}
@@ -152,10 +153,16 @@ const ProductsPage = () => {
 
                     {/* Actions */}
                     <TableCell className="px-5 py-4 text-start flex gap-3">
-                      <Link href={`/admin/products/edit/${product._id}`} className="text-blue-500">
+                      <Link
+                        href={`/admin/products/edit/${product._id}`}
+                        className="text-blue-500"
+                      >
                         <PencilSquareIcon className="w-5 h-5 inline-block" />
                       </Link>
-                      <button className="text-red-500" onClick={() => deleteProduct(product._id)}>
+                      <button
+                        className="text-red-500"
+                        onClick={() => deleteProduct(product._id)}
+                      >
                         <TrashIcon className="w-5 h-5 inline-block" />
                       </button>
                     </TableCell>

@@ -22,7 +22,7 @@ export default function SignUpPage() {
   const searchParams = useSearchParams();
   const roleFromUrl = searchParams.get("role");
 
-  console.log(RECAPTCHA_SITE_KEY)
+  console.log(RECAPTCHA_SITE_KEY);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -66,14 +66,15 @@ export default function SignUpPage() {
         captchaToken,
       });
 
-      console.log(res)
+      console.log(res);
 
       if (res?.userId) {
         alertSuccess("Sign-up successful! Check your email for OTP.");
         router.push(`/auth/verify-otp?email=${formData.email}`);
       } else {
         const knownErrors = {
-          "email already registered": "An account with this email already exists.",
+          "email already registered":
+            "An account with this email already exists.",
           "invalid input": "Please fill all fields correctly.",
         };
         const message =
